@@ -56,11 +56,12 @@ namespace serializ2
         public ClientSide(string server, string connserver, string username, string password)
         {
             client = connect(server, connserver, username, password);
+			Program.xmpp = client;
         }
 
-        public void sendMessage(string jid, string message, string thread = null)
+        public void sendMessage(string jid, string message, MessageType type)
         {
-            Message msg = new Message(new Jid(jid), MessageType.chat, message);
+            Message msg = new Message(new Jid(jid), type, message);
             if (thread != null)
                 msg.Thread = thread;
             client.Send(msg);
@@ -78,7 +79,7 @@ namespace serializ2
 
             for (int i = 0; i < jidUsers.Count; i++)
             {
-                sendMessage(jidUsers[i], "<conf>" + dataOfConferention);
+                sendMessage(jidUsers[i], "<conf>" + dataOfConferention, MessageType.groupchat);
             }
         }
 

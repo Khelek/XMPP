@@ -1,13 +1,27 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="serializ2/ClientSide.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="serializ2/FormConferention.cs">
     <Files>
-      <File FileName="serializ2/FormFirst.cs" Line="156" Column="57" />
-      <File FileName="serializ2/ClientSide.cs" Line="8" Column="3" />
+      <File FileName="serializ2/ClientSide.cs" Line="69" Column="10" />
+      <File FileName="serializ2/FormFirst.cs" Line="173" Column="36" />
+      <File FileName="serializ2/FormConferention.cs" Line="25" Column="43" />
+      <File FileName="serializ2/FormJoinConferention.cs" Line="19" Column="26" />
+      <File FileName="Disassembly" />
     </Files>
+    <Pads>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State>
+          <Value>pres</Value>
+          <Value>msg</Value>
+          <Value>mess</Value>
+        </State>
+      </Pad>
+    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/media/trash/programming/git/xmpp/serializ2/FormConferention.cs" line="138" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>

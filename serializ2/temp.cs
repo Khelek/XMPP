@@ -110,25 +110,8 @@ namespace serializ2
         private void SendTextMessage(string tabName, string id, TextBox dialog, string message)
         {
 
-            if (id == "")// то это не конференция
-                client.sendMessage(tabName, message);
-            else
-            {
-                //иначе отправляет каждому из списка состоящих в конференции сообщение
-                int index = conferentions.Find(id);
-                if (index == -1)
-                {
-                    return;//если конференции с таким id нет. Хотя такой ситуации быть не должно
-                }
-                for (int i = 0; i < conferentions[index].length; i++)
-                {
-                    string jidTalker = conferentions[index].users[i];
-                    if (jidTalker != login)
-                        client.sendMessage(jidTalker, message, id);
-                }
-            }
-            dialog.AppendText("user (" + DateTime.Now.ToString() + ")"
-                + Environment.NewLine + message + Environment.NewLine + Environment.NewLine);
+            client.sendMessage(tabName, message);
+            dialog.AppendText(formateString("user", Message));
         }
 
         private int findTagPage(string name)

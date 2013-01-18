@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.textBoxStatus = new System.Windows.Forms.TextBox();
-            this.createConference = new System.Windows.Forms.Button();
             this.checkBoxConnected = new System.Windows.Forms.CheckBox();
             this.listBoxUsers = new System.Windows.Forms.ListBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -39,6 +38,8 @@
             this.Login_Button = new System.Windows.Forms.Button();
             this.Add_Users = new System.Windows.Forms.Button();
             this.Exit = new System.Windows.Forms.Button();
+            this.buttonCreateConf = new System.Windows.Forms.Button();
+            this.buttonJoinConf = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // textBoxStatus
@@ -47,17 +48,6 @@
             this.textBoxStatus.Name = "textBoxStatus";
             this.textBoxStatus.Size = new System.Drawing.Size(114, 20);
             this.textBoxStatus.TabIndex = 3;
-            // 
-            // createConference
-            // 
-            this.createConference.Location = new System.Drawing.Point(188, 66);
-            this.createConference.Name = "createConference";
-            this.createConference.Size = new System.Drawing.Size(101, 24);
-            this.createConference.TabIndex = 8;
-            this.createConference.Text = "Конференция";
-            this.createConference.UseVisualStyleBackColor = true;
-            this.createConference.Visible = false;
-            this.createConference.Click += new System.EventHandler(this.createConference_Click);
             // 
             // checkBoxConnected
             // 
@@ -100,19 +90,19 @@
             // 
             // loginBox
             // 
-            this.loginBox.Location = new System.Drawing.Point(189, 245);
+            this.loginBox.Location = new System.Drawing.Point(183, 245);
             this.loginBox.Name = "loginBox";
-            this.loginBox.Size = new System.Drawing.Size(101, 20);
+            this.loginBox.Size = new System.Drawing.Size(106, 20);
             this.loginBox.TabIndex = 14;
             this.loginBox.Text = "Логин";
             this.loginBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.login_MouseClick);
             // 
             // passwordBox
             // 
-            this.passwordBox.Location = new System.Drawing.Point(189, 271);
+            this.passwordBox.Location = new System.Drawing.Point(183, 271);
             this.passwordBox.Name = "passwordBox";
             this.passwordBox.PasswordChar = '*';
-            this.passwordBox.Size = new System.Drawing.Size(101, 20);
+            this.passwordBox.Size = new System.Drawing.Size(106, 20);
             this.passwordBox.TabIndex = 15;
             this.passwordBox.Text = "Пароль";
             this.passwordBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.password_MouseClick);
@@ -129,9 +119,9 @@
             // 
             // Add_Users
             // 
-            this.Add_Users.Location = new System.Drawing.Point(189, 12);
+            this.Add_Users.Location = new System.Drawing.Point(183, 12);
             this.Add_Users.Name = "Add_Users";
-            this.Add_Users.Size = new System.Drawing.Size(100, 36);
+            this.Add_Users.Size = new System.Drawing.Size(106, 49);
             this.Add_Users.TabIndex = 17;
             this.Add_Users.Text = "Добавить контакт";
             this.Add_Users.UseVisualStyleBackColor = true;
@@ -139,20 +129,44 @@
             // 
             // Exit
             // 
-            this.Exit.Location = new System.Drawing.Point(189, 297);
+            this.Exit.Location = new System.Drawing.Point(183, 297);
             this.Exit.Name = "Exit";
-            this.Exit.Size = new System.Drawing.Size(101, 33);
+            this.Exit.Size = new System.Drawing.Size(107, 33);
             this.Exit.TabIndex = 18;
             this.Exit.Text = "Выйти";
             this.Exit.UseVisualStyleBackColor = true;
             this.Exit.Visible = false;
             this.Exit.Click += new System.EventHandler(this.Exit_Click);
             // 
+            // buttonCreateConf
+            // 
+            this.buttonCreateConf.Location = new System.Drawing.Point(183, 66);
+            this.buttonCreateConf.Name = "buttonCreateConf";
+            this.buttonCreateConf.Size = new System.Drawing.Size(106, 39);
+            this.buttonCreateConf.TabIndex = 19;
+            this.buttonCreateConf.Text = "Создать конференцию";
+            this.buttonCreateConf.UseVisualStyleBackColor = true;
+            this.buttonCreateConf.Visible = false;
+            this.buttonCreateConf.Click += new System.EventHandler(this.createConference_Click);
+            // 
+            // buttonJoinConf
+            // 
+            this.buttonJoinConf.Location = new System.Drawing.Point(183, 111);
+            this.buttonJoinConf.Name = "buttonJoinConf";
+            this.buttonJoinConf.Size = new System.Drawing.Size(106, 39);
+            this.buttonJoinConf.TabIndex = 20;
+            this.buttonJoinConf.Text = "Присоединиться к конференции";
+            this.buttonJoinConf.UseVisualStyleBackColor = true;
+            this.buttonJoinConf.Visible = false;
+            this.buttonJoinConf.Click += new System.EventHandler(this.buttonJoinConf_Click);
+            // 
             // FormFirst
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(302, 348);
+            this.ClientSize = new System.Drawing.Size(298, 348);
+            this.Controls.Add(this.buttonJoinConf);
+            this.Controls.Add(this.buttonCreateConf);
             this.Controls.Add(this.Exit);
             this.Controls.Add(this.Add_Users);
             this.Controls.Add(this.Login_Button);
@@ -162,7 +176,6 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.listBoxUsers);
             this.Controls.Add(this.checkBoxConnected);
-            this.Controls.Add(this.createConference);
             this.Controls.Add(this.textBoxStatus);
             this.Name = "FormFirst";
             this.Text = "FormFirst";
@@ -174,7 +187,6 @@
         #endregion
 
         private System.Windows.Forms.TextBox textBoxStatus;
-        private System.Windows.Forms.Button createConference;
         private System.Windows.Forms.CheckBox checkBoxConnected;
         private System.Windows.Forms.ListBox listBoxUsers;
         private System.Windows.Forms.Label label2;
@@ -184,6 +196,8 @@
         private System.Windows.Forms.Button Login_Button;
         private System.Windows.Forms.Button Add_Users;
         private System.Windows.Forms.Button Exit;
+        private System.Windows.Forms.Button buttonCreateConf;
+        private System.Windows.Forms.Button buttonJoinConf;
     }
 }
 

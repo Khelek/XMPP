@@ -11,20 +11,15 @@ namespace serializ2
 {
     public partial class FormCreateConferention : Form
     {
-        List<string> _selectedUsers = new List<string>();
-        public List<string> selectedUsers
-        {
-            get { return _selectedUsers; }
-        }
-        public FormCreateConferention(ListBox.ObjectCollection users)
+        List<string> selectedUsers = new List<string>();
+        public FormCreateConferention(List<string> users)
         {
             InitializeComponent();
             for (int i = 0; i < users.Count; i++)
             {
                 CheckBox c = new CheckBox();
-                c.Name = users[i].ToString();
-                ListViewItem item = new ListViewItem(c.Name,0);
-                item.Checked = false;
+                ListViewItem item = new ListViewItem(users[i], 0);
+                item.Checked = true;//"true" for debug
                 listViewUsers.Items.Add(item);
             }
         }
@@ -35,10 +30,12 @@ namespace serializ2
             {
                 if (listViewUsers.Items[i].Checked)
                 {
-                    _selectedUsers.Add(listViewUsers.Items[i].Text);
+                    selectedUsers.Add(listViewUsers.Items[i].Text);
                 }
-                this.Close();
             }
+			FormConferention fConf = new FormConferention("conf@conference.haupc", selectedUsers);
+			fConf.Show();
+			this.Close();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -48,5 +45,6 @@ namespace serializ2
 
 
         
+		
     }
 }

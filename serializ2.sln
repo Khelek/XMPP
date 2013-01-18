@@ -14,6 +14,9 @@ Global
 		{8FB24B4A-1DBA-4765-BA6D-87CEF5C54EC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FB24B4A-1DBA-4765-BA6D-87CEF5C54EC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = serializ2\serializ2.csproj
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

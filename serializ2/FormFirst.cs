@@ -17,14 +17,11 @@ namespace serializ2
 {
 
     delegate void ClientEvent(object o);
-
     public partial class FormFirst : Form
     {
         ClientSide client;
         FormDialog formDialog;
         TabControl tabsDialog;
-        Conferentions conferentions = new Conferentions();
-        private int idConf = 0;//индексы конференций нужно хранить на сервере, иначе будут пересечения
         private string login;// текущий логин пользователя(имеется ввиду jid на самом деле - xxx@yyy.zz)
 
         public FormFirst()
@@ -56,8 +53,7 @@ namespace serializ2
             }
         }
 #endif
-
-
+		
         private void createTabPage(string tabName, string insideText = null, string key = "")
         {
             TabPage p = new TabPage(tabName);
@@ -73,22 +69,18 @@ namespace serializ2
             {
                 dialog.AppendText(insideText);
             }
-
             TextBox textBoxSend = new TextBox();
             textBoxSend.Location = new Point(dialog.Location.X, dialog.Location.Y + dialog.Height);
             textBoxSend.Size = new System.Drawing.Size(240, 45);
             textBoxSend.Multiline = true;
-
             Button send = new Button();
             send.Text = "Послать";
             send.Location = new Point(dialog.Location.X + dialog.Width - 80, dialog.Location.Y + dialog.Height + 10);
             send.Click += delegate(object s, EventArgs a)
             {
-                SendTextMessage(tabName, p.Name, dialog, textBoxSend.Text);
+                SendTextMessage(tabName, dialog, textBoxSend.Text);
                 textBoxSend.Clear();
             };
-
-
             CheckBox enter = new CheckBox();
             enter.Text = "Send if Enter";
             enter.Location = new Point(textBoxSend.Location.X + textBoxSend.Width + 10, dialog.Location.Y + dialog.Height + 5);
@@ -98,37 +90,18 @@ namespace serializ2
             {
                 if (k.KeyCode == Keys.Enter && enter.Checked)
                 {
-                    SendTextMessage(tabName, p.Name, dialog, textBoxSend.Text);
+                    SendTextMessage(tabName, dialog, textBoxSend.Text);
                     textBoxSend.Clear();
                 }
             };
-
             p.Controls.AddRange(new Control[] { dialog, textBoxSend, send, enter });
             tabsDialog.TabPages.Add(p);
         }
 
-        private void SendTextMessage(string tabName, string id, TextBox dialog, string message)
+        private void SendTextMessage(string toJid, TextBox dialog, string message)
         {
-
-            if (id == "")// то это не конференция
-                client.sendMessage(tabName, message);
-            else
-            {
-                //иначе отправляет каждому из списка состоящих в конференции сообщение
-                int index = conferentions.Find(id);
-                if (index == -1)
-                {
-                    return;//если конференции с таким id нет. Хотя такой ситуации быть не должно
-                }
-                for (int i = 0; i < conferentions[index].length; i++)
-                {
-                    string jidTalker = conferentions[index].users[i];
-                    if (jidTalker != login)
-                        client.sendMessage(jidTalker, message, id);
-                }
-            }
-            dialog.AppendText("user (" + DateTime.Now.ToString() + ")"
-                + Environment.NewLine + message + Environment.NewLine + Environment.NewLine);
+            client.sendMessage(toJid, message, MessageType.chat);
+            dialog.AppendText(formateString("user", message));
         }
 
         private int findTagPage(string name)
@@ -142,61 +115,36 @@ namespace serializ2
             }
             return -1;
         }
-
-        private OneConferention stringToConferention()
-        {
-            string message = client.mess.Substring(6);//ибо первые 6 - <conf>
-            String[] arr = message.Split('/');//нужно экранировать <>/
-            string id = arr[0];
-            string name = arr[1];
-            int userCount = Int32.Parse(arr[2]);
-            List<string> users = new List<string>();
-            for (int i = 0; i < userCount; i++)
-            {
-                users.Add(arr[i + 3]);
-            }
-            return new OneConferention(id, name, users);
-        }
+		
+		private string formateString(string from, string mess) {
+			return (from + " (" + DateTime.Now.ToString() + ")"//Controls[0] - это textBox с диалогом
+                            + Environment.NewLine + mess + Environment.NewLine + Environment.NewLine);
+		}
 
         private void HandlerOnMessege(object msg)
         {
             tabsDialog.Invoke(new MethodInvoker(delegate
             {
 			agsXMPP.protocol.client.Message mess = (agsXMPP.protocol.client.Message)msg;
-				int indexTab;
-                    switch(mess.Type) {
-				case MessageType.chat: //простое сообщение
-				
-                        initFormDialog();
-                        indexTab = findTagPage(client.from);
-                        if (indexTab != -1) //если уже существует вкладка для него
-                        {
-                            string nameTalker = tabsDialog.TabPages[indexTab].Text;
-                            ((TextBox)tabsDialog.TabPages[indexTab].Controls[0]).AppendText(nameTalker + " (" + DateTime.Now.ToString() + ")"//Controls[0] - это textBox с диалогом
-                                + Environment.NewLine + client.mess + Environment.NewLine + Environment.NewLine);
-                            tabsDialog.Focus();
-                        }
-											
-                            createTabPage(client.from, client.from + " (" + DateTime.Now.ToString() + ")"
-                                + Environment.NewLine + client.mess + Environment.NewLine + Environment.NewLine);
-                            tabsDialog.Focus();
-				
-                        break;
-                    
-                
-				case MessageType.groupchat:	
-				
-                    initFormDialog();
-                    indexTab = tabsDialog.TabPages.IndexOfKey(client.thread);
-                    if (indexTab != -1)
-                    {//TabPages[indexTab].Control[0] - textBox с диалогом
-                        ((TextBox)tabsDialog.TabPages[indexTab].Controls[0]).AppendText(client.from + " (" + DateTime.Now.ToString() + ")"
-                            + Environment.NewLine + client.mess + Environment.NewLine + Environment.NewLine);
-                        tabsDialog.Focus();
-                    }
-				
-					break;
+			string from = mess.From.Bare.ToString();
+			int indexTab;
+                switch(mess.Type) {
+			case MessageType.chat: //простое сообщение			
+                initFormDialog();
+                indexTab = findTagPage(from);
+                if (indexTab != -1) //если уже существует вкладка для него
+                {
+                    ((TextBox)tabsDialog.TabPages[indexTab].Controls[0]).AppendText(formateString(from, mess.Body));
+                }
+				else {				
+                	createTabPage(from, formateString(from, mess.Body));
 				}
+                tabsDialog.Focus();
+			    break;   
+			case MessageType.groupchat:				
+               	//конференции сами ловят сообщения в своей форме
+				break;
+			}
             }));
         }
 
@@ -227,35 +175,23 @@ namespace serializ2
                     tabsDialog.Size = new System.Drawing.Size(500, 260);
                     tabsDialog.Location = new Point(10, 10);
                     formDialog.Controls.AddRange(new Control[] { tabsDialog });
-
                     formDialog.Show();//this is
                     formDialog.Hide();//КОООСТЫЫЫЫЫЛЬ
+					formDialog.Close();
                 }
-                createConference.Show();
+                buttonCreateConf.Show();
+                buttonJoinConf.Show();
                 checkBoxConnected.Checked = true;
             }));
         }
 
         private void createConference_Click(object sender, EventArgs e)
-        {
-            string conferenceName = "Конференция " + idConf;
-            idConf++;//костыль, id надо хранить на серваке, либо при отсылке приглашений сравнивать на наличие id у клиентов, но это плохой план
-            string createrJid = login;
-            /*for (int i = 0; i < listBoxUsers.SelectedItems.Count; i++)
-                users.Add(listBoxUsers.SelectedItems[i].ToString());*/
-
-            FormCreateConferention fCreate = new FormCreateConferention(listBoxUsers.Items);
-            fCreate.ShowDialog();
-
-            List<string> users = fCreate.selectedUsers;
-            if (users.Count == 0) return;
-            initFormDialog();
-            OneConferention conf = new OneConferention(idConf.ToString(), conferenceName, createrJid, new List<string>(users));
-            conferentions.Add(conf);
-            client.sendInviteConferention(users, conf.toString());
-            //можно еще добавить отправку всем "Конференция создана"
-
-            createTabPage(conferenceName, null, idConf.ToString());
+        {            
+            List<string> users = new List<string>();
+            foreach(var it in listBoxUsers.Items)
+                users.Add(it.ToString());
+            FormCreateConferention fCreate = new FormCreateConferention(users);
+            fCreate.Show();
         }
 
         private void textBoxStatus_KeyDown(object sender, KeyEventArgs e)
@@ -318,18 +254,15 @@ namespace serializ2
             {
                 string nickname = loginBox.Text.Substring(0, loginBox.Text.IndexOf("@"));
                 string server = loginBox.Text.Substring(loginBox.Text.IndexOf("@") + 1);
-                string connserver = ( server == "gmail.com" ) ? "talk.google.com" : (( server == "haupc") ? "192.168.1.4" : server );
-
-                login = loginBox.Text;
+                string connserver = ( server == "gmail.com" ) ? "talk.google.com" : (( server == "haupc") ? "172.25.76.57" : server );
+                Program.jid = loginBox.Text;
                 //khelek@jabberd.eu
                 //abe2b33519
                 Exit.Show();
                 loginBox.Hide();
                 passwordBox.Hide();
                 Login_Button.Hide();
-
                 //Add_Users.Hide();
-
                 client = new ClientSide(server, connserver, nickname, passwordBox.Text);
                 client.Receive += new ClientEvent(HandlerOnMessege);
                 client.getPresence += new ClientEvent(HandlerOnPresence);
@@ -353,7 +286,8 @@ namespace serializ2
             passwordBox.Show();
             Login_Button.Show();
             //Add_Users.Show();
-            createConference.Hide();
+            buttonCreateConf.Hide();
+            buttonJoinConf.Hide();
             listBoxUsers.Items.Clear();
             checkBoxConnected.Checked = false;
 
@@ -363,6 +297,11 @@ namespace serializ2
         {
             FormAddUser add_us = new FormAddUser();//никак не работает
             add_us.Show();//ничего не делает
+        }
+
+        private void buttonJoinConf_Click(object sender, EventArgs e) {
+            FormJoinConferention fJoinConf = new FormJoinConferention();
+            fJoinConf.Show();
         }
 
 
