@@ -159,6 +159,7 @@
             this.listUsers.TabIndex = 21;
             this.listUsers.UseCompatibleStateImageBehavior = false;
             this.listUsers.View = System.Windows.Forms.View.List;
+            this.listUsers.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listUsers_MouseDoubleClick);
             // 
             // FormFirst
             // 
@@ -179,6 +180,7 @@
             this.Controls.Add(this.textBoxStatus);
             this.Name = "FormFirst";
             this.Text = "FormFirst";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormFirst_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 

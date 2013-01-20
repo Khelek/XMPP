@@ -21,6 +21,8 @@ namespace serializ2 {
         TabControl tabsDialog;
         XmppClientConnection xmpp;
         private Jid mainJid;// текущий логин пользователя(имеется ввиду jid на самом деле - xxx@yyy.zz)
+        private List<string> onlineUsers = new List<string>();
+
 
         public FormFirst() {
             InitializeComponent();
@@ -42,11 +44,19 @@ namespace serializ2 {
                     loginBox.Text = "user@haupc";//"haudvd@gmail.com";
                     passwordBox.Text = "321";//"haukot1994";
                     break;
+                case 4:
+                    loginBox.Text = "khelek@jabber.ru";
+                    passwordBox.Text = "haukot1994";
+                    break;
+                case 5:
+                    loginBox.Text = "khelek@jabberd.eu";
+                    passwordBox.Text = "abe2b33519";
+                    break;
             }
         }
 #endif
 
-        private void createTabPage(string tabName, string insideText = null, string key = "") {
+        private void createTabPage(string tabName, string key = "", string insideText = null) {
             TabPage p = new TabPage(tabName);
             p.Name = key;
             TextBox dialog = new TextBox();
@@ -77,7 +87,7 @@ namespace serializ2 {
 
             textBoxSend.KeyDown += delegate(object o, KeyEventArgs k) {
                 if ( k.KeyCode == Keys.Enter && enter.Checked ) {
-                    SendTextMessage(tabName, dialog, textBoxSend.Text);
+                    SendTextMessage(key, dialog, textBoxSend.Text);
                     textBoxSend.Clear();
                 }
             };
@@ -93,7 +103,7 @@ namespace serializ2 {
 
         private int findTagPage(string name) {
             for ( int i = 0; i < tabsDialog.TabPages.Count; i++ ) {
-                if ( name == tabsDialog.TabPages[i].Text ) {
+                if ( name == tabsDialog.TabPages[i].Name ) {
                     return i;
                 }
             }
@@ -146,19 +156,29 @@ namespace serializ2 {
             }));
         }
 
-        private void HandlerOnPresence(object o, Presence pres) {
+        private void HandlerOnPresence(object o, Presence presence) {
             BeginInvoke(new MethodInvoker(delegate {
-                Presence presence = (Presence)pres;
-                if ( presence.Type.ToString() == "unavailable" ) {//client.presence == "unavailable") 
-                    listUsers.Items.Remove(getListViewItem(presence.From.Bare));
-                } else {
-                    listUsers.Items.Add(presence.From.Bare);
+                ListViewItem it = getListViewItem(presence.From.Bare);
+                if ( presence.Type.ToString() == "unavailable" || presence.Type.ToString() == "error" ) {//client.presence == "unavailable") 
+                    if ( it != null )
+                        it.ForeColor = Color.Red;
+                    else {
+                        onlineUsers.Remove(presence.From.Bare);
+                    }
+                }
+                if ( presence.Type.ToString() == "available" ) {
+                    if ( it != null )
+                        it.ForeColor = Color.Black;
+                    else {
+                        onlineUsers.Add(presence.From.Bare);
+                    }
                 }
             }));
         }
 
         private void HandlerOnLogin(object o) {
             BeginInvoke(new MethodInvoker(delegate() {
+                setStatus("Онлайн");
                 if ( formDialog == null ) {
                     formDialog = new FormDialog();
                     tabsDialog = new TabControl();
@@ -176,20 +196,27 @@ namespace serializ2 {
         }
 
         private void HandlerOnRosterStart(object o) {
-            BeginInvoke(new MethodInvoker(delegate {
+            BeginInvoke(new MethodInvoker(delegate() {
                 listUsers.BeginUpdate();
             }));
         }
 
         private void HandlerOnRosterEnd(object o) {
-            BeginInvoke(new MethodInvoker(delegate {
+            BeginInvoke(new MethodInvoker(delegate() {
+                for ( int i = onlineUsers.Count - 1; i >= 0; i-- ) {
+                    ListViewItem it = getListViewItem(onlineUsers[i]);
+                    if ( it != null ) {
+                        it.ForeColor = Color.Black;
+                        onlineUsers.RemoveAt(i);
+                    }
+                }
                 listUsers.EndUpdate();
             }));
         }
 
         private void HandlerOnRosterItem(object o, agsXMPP.protocol.iq.roster.RosterItem item) {
             BeginInvoke(new MethodInvoker(delegate {
-                string itemJid = item.Jid.ToString();
+                string itemJid = item.Jid.Bare;
                 if ( item.Subscription != agsXMPP.protocol.iq.roster.SubscriptionType.remove ) {
                     string nodeText = item.Name != null ? item.Name : itemJid;
                     listUsers.Items.Add(createListViewItem(itemJid, nodeText, Color.Red));
@@ -200,7 +227,7 @@ namespace serializ2 {
         }
 
         private void setStatus(string status) {
-            Presence p = new Presence(ShowType.NONE, status);
+            Presence p = new Presence(ShowType.chat, status);
             xmpp.Send(p);
             textBoxStatus.Clear();
         }
@@ -223,13 +250,14 @@ namespace serializ2 {
             }
         }
 
-        private void listBox2_MouseDoubleClick(object sender, MouseEventArgs e) {
-            if ( listUsers.SelectedItems[0] != null ) {
+        private void listUsers_MouseDoubleClick(object sender, MouseEventArgs e) {
+            if ( listUsers.SelectedItems.Count > 0 && listUsers.SelectedItems[0] != null ) {
                 initFormDialog();
-                string tabName = listUsers.SelectedItems[0].ToString();
-                int index = findTagPage(tabName);
+                string name = listUsers.SelectedItems[0].Text;
+                string jid = listUsers.SelectedItems[0].Name;
+                int index = findTagPage(jid);
                 if ( index == -1 ) {
-                    createTabPage(tabName);
+                    createTabPage(name, jid);
                 } else {
                     tabsDialog.TabPages[index].Focus();
                 }
@@ -257,12 +285,12 @@ namespace serializ2 {
             xmpp.UseStartTLS = true;
 
             xmpp.Open();
-            xmpp.OnMessage += HandlerOnMessage;
-            xmpp.OnLogin += HandlerOnLogin;
-            xmpp.OnPresence += HandlerOnPresence;
             xmpp.OnRosterStart += HandlerOnRosterStart;
             xmpp.OnRosterEnd += HandlerOnRosterEnd;
             xmpp.OnRosterItem += HandlerOnRosterItem;
+            xmpp.OnMessage += HandlerOnMessage;
+            xmpp.OnLogin += HandlerOnLogin;
+            xmpp.OnPresence += HandlerOnPresence;
         }
 
         private void Login_Button_Click(object sender, EventArgs e) {
@@ -270,13 +298,14 @@ namespace serializ2 {
                 string nickname = loginBox.Text.Substring(0, loginBox.Text.IndexOf("@"));
                 string server = loginBox.Text.Substring(loginBox.Text.IndexOf("@") + 1);
                 string connserver = ( server == "gmail.com" ) ? "talk.google.com" : ( ( server == "haupc" ) ? "192.168.1.3" : server );
-                Program.jid = loginBox.Text;
+                mainJid = new Jid(loginBox.Text);
                 //khelek@jabberd.eu
                 //abe2b33519
                 Exit.Show();
                 loginBox.Hide();
                 passwordBox.Hide();
                 Login_Button.Hide();
+                connect(server, connserver, nickname, passwordBox.Text);
                 //Add_Users.Hide();
             } catch {
                 MessageBox.Show("Неверный логин или пароль, попробуйте еще раз");
@@ -316,6 +345,11 @@ namespace serializ2 {
         private void buttonJoinConf_Click(object sender, EventArgs e) {
             FormJoinConferention fJoinConf = new FormJoinConferention(xmpp, mainJid);
             fJoinConf.Show();
+        }
+
+        private void FormFirst_FormClosing(object sender, FormClosingEventArgs e) {
+            if ( xmpp != null )
+                xmpp.Close();
         }
 
     }

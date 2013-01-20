@@ -22,6 +22,7 @@ namespace serializ2
             Application.Run(new FormFirst());
 #endif
 #if DEBUG 
+            //( new FormFirst(5) ).Show();
             Application.Run(new FormFirst(3));
 #endif
         }
