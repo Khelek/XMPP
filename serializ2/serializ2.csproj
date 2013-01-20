@@ -55,7 +55,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientSide.cs" />
     <Compile Include="Conferentions.cs" />
     <Compile Include="FormConferention.cs">
       <SubType>Form</SubType>

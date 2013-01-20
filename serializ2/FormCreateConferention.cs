@@ -6,13 +6,18 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using agsXMPP;
+using agsXMPP.protocol.client;
 
 namespace serializ2
 {
     public partial class FormCreateConferention : Form
     {
         List<string> selectedUsers = new List<string>();
-        public FormCreateConferention(List<string> users)
+        XmppClientConnection mainXmpp;
+        Jid mainJid;
+
+        public FormCreateConferention(XmppClientConnection xmpp, Jid jid, List<string> users)
         {
             InitializeComponent();
             for (int i = 0; i < users.Count; i++)
@@ -33,7 +38,7 @@ namespace serializ2
                     selectedUsers.Add(listViewUsers.Items[i].Text);
                 }
             }
-			FormConferention fConf = new FormConferention("conf@conference.haupc", selectedUsers);
+			FormConferention fConf = new FormConferention(mainXmpp, mainJid, "khelek", "conf@conference.haupc", selectedUsers);
 			fConf.Show();
 			this.Close();
         }

@@ -13,49 +13,40 @@ using agsXMPP;
 using agsXMPP.protocol.client;
 
 
-namespace serializ2
-{
+namespace serializ2 {
 
     delegate void ClientEvent(object o);
-    public partial class FormFirst : Form
-    {
-        ClientSide client;
+    public partial class FormFirst : Form {
         FormDialog formDialog;
         TabControl tabsDialog;
-        private string login;// текущий логин пользователя(имеется ввиду jid на самом деле - xxx@yyy.zz)
+        XmppClientConnection xmpp;
+        private Jid mainJid;// текущий логин пользователя(имеется ввиду jid на самом деле - xxx@yyy.zz)
 
-        public FormFirst()
-        {
+        public FormFirst() {
             InitializeComponent();
         }
 #if DEBUG
-        public FormFirst(int i)
-        {
+        public FormFirst(int i) {
             InitializeComponent();
-            switch (i)//этот свитч 
+            switch ( i )//это свитч 
             {
-                case 0:
-                    loginBox.Text = "user@haupc";//"misha@192.168.43.3";//
-                    passwordBox.Text = "321";//"9ca82e3206caf6d7075c050fe78edc806efb1446";// 
-                    break;
-                case 3:
-                    loginBox.Text = "khelek@jabber.ru";//"misha@192.168.43.3";//
-                    passwordBox.Text = "haukot1994";//"9ca82e3206caf6d7075c050fe78edc806efb1446";// 
-                    break;
                 case 1:
-                    loginBox.Text = "khelek@jabberd.eu";
-                    passwordBox.Text = "abe2b33519";
+                    loginBox.Text = "user2@haupc";//"khelek@jabber.ru";
+                    passwordBox.Text = "321";//"haukot1994";
                     break;
                 case 2:
-                    loginBox.Text = "haudvd@gmail.com";
-                    passwordBox.Text = "haukot1994";
+                    loginBox.Text = "admin@haupc";//"khelek@jabberd.eu";
+                    passwordBox.Text = "haukot";//"abe2b33519";
+                    break;
+                case 3:
+                    loginBox.Text = "user@haupc";//"haudvd@gmail.com";
+                    passwordBox.Text = "321";//"haukot1994";
                     break;
             }
         }
 #endif
-		
-        private void createTabPage(string tabName, string insideText = null, string key = "")
-        {
+
+        private void createTabPage(string tabName, string insideText = null, string key = "") {
             TabPage p = new TabPage(tabName);
             p.Name = key;
             TextBox dialog = new TextBox();
@@ -65,8 +56,7 @@ namespace serializ2
             dialog.ScrollBars = ScrollBars.Vertical;
             dialog.ReadOnly = true;
             dialog.BackColor = Color.White;
-            if (insideText != null)
-            {
+            if ( insideText != null ) {
                 dialog.AppendText(insideText);
             }
             TextBox textBoxSend = new TextBox();
@@ -76,8 +66,7 @@ namespace serializ2
             Button send = new Button();
             send.Text = "Послать";
             send.Location = new Point(dialog.Location.X + dialog.Width - 80, dialog.Location.Y + dialog.Height + 10);
-            send.Click += delegate(object s, EventArgs a)
-            {
+            send.Click += delegate(object s, EventArgs a) {
                 SendTextMessage(tabName, dialog, textBoxSend.Text);
                 textBoxSend.Clear();
             };
@@ -86,10 +75,8 @@ namespace serializ2
             enter.Location = new Point(textBoxSend.Location.X + textBoxSend.Width + 10, dialog.Location.Y + dialog.Height + 5);
             enter.Checked = true;
 
-            textBoxSend.KeyDown += delegate(object o, KeyEventArgs k)
-            {
-                if (k.KeyCode == Keys.Enter && enter.Checked)
-                {
+            textBoxSend.KeyDown += delegate(object o, KeyEventArgs k) {
+                if ( k.KeyCode == Keys.Enter && enter.Checked ) {
                     SendTextMessage(tabName, dialog, textBoxSend.Text);
                     textBoxSend.Clear();
                 }
@@ -98,78 +85,81 @@ namespace serializ2
             tabsDialog.TabPages.Add(p);
         }
 
-        private void SendTextMessage(string toJid, TextBox dialog, string message)
-        {
-            client.sendMessage(toJid, message, MessageType.chat);
+        private void SendTextMessage(string toJid, TextBox dialog, string message) {
+            agsXMPP.protocol.client.Message msg = new agsXMPP.protocol.client.Message(new Jid(toJid), MessageType.chat, message);
+            xmpp.Send(msg);
             dialog.AppendText(formateString("user", message));
         }
 
-        private int findTagPage(string name)
-        {
-            for (int i = 0; i < tabsDialog.TabPages.Count; i++)
-            {
-                if (name == tabsDialog.TabPages[i].Text)
-                {
+        private int findTagPage(string name) {
+            for ( int i = 0; i < tabsDialog.TabPages.Count; i++ ) {
+                if ( name == tabsDialog.TabPages[i].Text ) {
                     return i;
                 }
             }
             return -1;
         }
-		
-		private string formateString(string from, string mess) {
-			return (from + " (" + DateTime.Now.ToString() + ")"//Controls[0] - это textBox с диалогом
-                            + Environment.NewLine + mess + Environment.NewLine + Environment.NewLine);
-		}
 
-        private void HandlerOnMessege(object msg)
-        {
-            tabsDialog.Invoke(new MethodInvoker(delegate
-            {
-			agsXMPP.protocol.client.Message mess = (agsXMPP.protocol.client.Message)msg;
-			string from = mess.From.Bare.ToString();
-			int indexTab;
-                switch(mess.Type) {
-			case MessageType.chat: //простое сообщение			
-                initFormDialog();
-                indexTab = findTagPage(from);
-                if (indexTab != -1) //если уже существует вкладка для него
-                {
-                    ((TextBox)tabsDialog.TabPages[indexTab].Controls[0]).AppendText(formateString(from, mess.Body));
+        private string formateString(string from, string mess) {
+            return ( from + " (" + DateTime.Now.ToString() + ")"//Controls[0] - это textBox с диалогом
+                            + Environment.NewLine + mess + Environment.NewLine + Environment.NewLine );
+        }
+
+        private ListViewItem getListViewItem(string jid) {
+            foreach ( ListViewItem lvi in listUsers.Items ) {
+                if ( jid.ToLower() == lvi.Name.ToLower() )
+                    return lvi;
+            }
+            return null;
+        }
+
+        private ListViewItem createListViewItem(string jid, string name, Color color) {
+            ListViewItem item = new ListViewItem();
+            item.Name = jid;
+            item.Text = name;
+            item.ForeColor = color;
+            return item;
+        }
+
+        private void HandlerOnMessage(object o, agsXMPP.protocol.client.Message msg) {
+            BeginInvoke(new MethodInvoker(delegate {
+                string from = msg.From.Bare.ToString();
+                int indexTab;
+                switch ( msg.Type ) {
+                    case MessageType.chat: //простое сообщение			
+                        initFormDialog();
+                        indexTab = findTagPage(from);
+                        if ( indexTab != -1 ) {//если уже существует вкладка для него 
+                            ( (TextBox)tabsDialog.TabPages[indexTab].Controls[0] ).AppendText(formateString(from, msg.Body));
+                        } else {
+                            createTabPage(from, formateString(from, msg.Body));
+                        }
+                        tabsDialog.Focus();
+                        break;
+                    case MessageType.groupchat:
+                        //конференции сами ловят сообщения в своей форме
+                        break;
+                    case MessageType.error:
+                        //вообще не ловятся
+                        break;
                 }
-				else {				
-                	createTabPage(from, formateString(from, mess.Body));
-				}
-                tabsDialog.Focus();
-			    break;   
-			case MessageType.groupchat:				
-               	//конференции сами ловят сообщения в своей форме
-				break;
-			}
             }));
         }
 
-        private void HandlerOnPresence(object pres)
-        {
-            listBoxUsers.Invoke(new MethodInvoker(delegate
-            {
-				Presence presence = (Presence)pres;
-                if (presence.Type.ToString() == "unavailable")//client.presence == "unavailable")
-                {
-                    listBoxUsers.Items.Remove(presence.From.Bare);
-                }
-                else
-                {
-                    listBoxUsers.Items.Add(presence.From.Bare);
+        private void HandlerOnPresence(object o, Presence pres) {
+            BeginInvoke(new MethodInvoker(delegate {
+                Presence presence = (Presence)pres;
+                if ( presence.Type.ToString() == "unavailable" ) {//client.presence == "unavailable") 
+                    listUsers.Items.Remove(getListViewItem(presence.From.Bare));
+                } else {
+                    listUsers.Items.Add(presence.From.Bare);
                 }
             }));
         }
 
-        private void HandlerOnLogin(object nil)
-        {
-            checkBoxConnected.Invoke(new MethodInvoker(delegate()
-            {
-                if (formDialog == null)
-                {
+        private void HandlerOnLogin(object o) {
+            BeginInvoke(new MethodInvoker(delegate() {
+                if ( formDialog == null ) {
                     formDialog = new FormDialog();
                     tabsDialog = new TabControl();
                     tabsDialog.Size = new System.Drawing.Size(500, 260);
@@ -177,7 +167,7 @@ namespace serializ2
                     formDialog.Controls.AddRange(new Control[] { tabsDialog });
                     formDialog.Show();//this is
                     formDialog.Hide();//КОООСТЫЫЫЫЫЛЬ
-					formDialog.Close();
+                    formDialog.Close();
                 }
                 buttonCreateConf.Show();
                 buttonJoinConf.Show();
@@ -185,76 +175,101 @@ namespace serializ2
             }));
         }
 
-        private void createConference_Click(object sender, EventArgs e)
-        {            
-            List<string> users = new List<string>();
-            foreach(var it in listBoxUsers.Items)
-                users.Add(it.ToString());
-            FormCreateConferention fCreate = new FormCreateConferention(users);
-            fCreate.Show();
+        private void HandlerOnRosterStart(object o) {
+            BeginInvoke(new MethodInvoker(delegate {
+                listUsers.BeginUpdate();
+            }));
         }
 
-        private void textBoxStatus_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-            {
-                client.setStatus(textBoxStatus.Text);
-                textBoxStatus.Clear();
+        private void HandlerOnRosterEnd(object o) {
+            BeginInvoke(new MethodInvoker(delegate {
+                listUsers.EndUpdate();
+            }));
+        }
+
+        private void HandlerOnRosterItem(object o, agsXMPP.protocol.iq.roster.RosterItem item) {
+            BeginInvoke(new MethodInvoker(delegate {
+                string itemJid = item.Jid.ToString();
+                if ( item.Subscription != agsXMPP.protocol.iq.roster.SubscriptionType.remove ) {
+                    string nodeText = item.Name != null ? item.Name : itemJid;
+                    listUsers.Items.Add(createListViewItem(itemJid, nodeText, Color.Red));
+                } else {
+                    listUsers.Items.Remove(getListViewItem(itemJid));
+                }
+            }));
+        }
+
+        private void setStatus(string status) {
+            Presence p = new Presence(ShowType.NONE, status);
+            xmpp.Send(p);
+            textBoxStatus.Clear();
+        }
+
+        private void textBoxStatus_KeyDown(object sender, KeyEventArgs e) {
+            if ( e.KeyCode == Keys.Enter ) {
+                setStatus(textBoxStatus.Text);
             }
         }
 
-        private void initFormDialog()
-        {
-            if (!formDialog.Visible)
-            {
+        private void button4_Click(object sender, EventArgs e) {
+            setStatus(textBoxStatus.Text);
+        }
+
+        private void initFormDialog() {
+            if ( !formDialog.Visible ) {
                 formDialog.Show();
-            }
-            else
-            {
+            } else {
                 formDialog.Focus();
             }
         }
 
-        private void listBox2_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (listBoxUsers.SelectedItem != null)
-            {
+        private void listBox2_MouseDoubleClick(object sender, MouseEventArgs e) {
+            if ( listUsers.SelectedItems[0] != null ) {
                 initFormDialog();
-                string tabName = listBoxUsers.SelectedItem.ToString();
+                string tabName = listUsers.SelectedItems[0].ToString();
                 int index = findTagPage(tabName);
-                if (index == -1)
-                {
+                if ( index == -1 ) {
                     createTabPage(tabName);
-                }
-                else
-                {
+                } else {
                     tabsDialog.TabPages[index].Focus();
                 }
             }
         }
 
-        private void button4_Click(object sender, EventArgs e)
-        {
-            client.setStatus(textBoxStatus.Text);
-        }
-
-        private void login_MouseClick(object sender, MouseEventArgs e)
-        {
+        private void login_MouseClick(object sender, MouseEventArgs e) {
             //login.Clear();
         }
 
-        private void password_MouseClick(object sender, MouseEventArgs e)
-        {
+        private void password_MouseClick(object sender, MouseEventArgs e) {
             //password.Clear();
         }
 
-        private void Login_Button_Click(object sender, EventArgs e)
-        {
-            try
-            {
+        private void connect(string server, string connserver, string username, string password) {
+            xmpp = new XmppClientConnection();
+            xmpp.Server = server;//"jabberd.eu";
+            xmpp.ConnectServer = connserver;// "jabberd.eu";
+            if ( server == "haupc" || server == "192.168.1.4" ) {
+                xmpp.Port = 5222;
+            }
+            xmpp.Username = username;// "khelek";
+            xmpp.Password = password;//"abe2b33519";
+            //xmpp.UseSSL = true;
+            xmpp.UseStartTLS = true;
+
+            xmpp.Open();
+            xmpp.OnMessage += HandlerOnMessage;
+            xmpp.OnLogin += HandlerOnLogin;
+            xmpp.OnPresence += HandlerOnPresence;
+            xmpp.OnRosterStart += HandlerOnRosterStart;
+            xmpp.OnRosterEnd += HandlerOnRosterEnd;
+            xmpp.OnRosterItem += HandlerOnRosterItem;
+        }
+
+        private void Login_Button_Click(object sender, EventArgs e) {
+            try {
                 string nickname = loginBox.Text.Substring(0, loginBox.Text.IndexOf("@"));
                 string server = loginBox.Text.Substring(loginBox.Text.IndexOf("@") + 1);
-                string connserver = ( server == "gmail.com" ) ? "talk.google.com" : (( server == "haupc") ? "172.25.76.57" : server );
+                string connserver = ( server == "gmail.com" ) ? "talk.google.com" : ( ( server == "haupc" ) ? "192.168.1.3" : server );
                 Program.jid = loginBox.Text;
                 //khelek@jabberd.eu
                 //abe2b33519
@@ -263,13 +278,7 @@ namespace serializ2
                 passwordBox.Hide();
                 Login_Button.Hide();
                 //Add_Users.Hide();
-                client = new ClientSide(server, connserver, nickname, passwordBox.Text);
-                client.Receive += new ClientEvent(HandlerOnMessege);
-                client.getPresence += new ClientEvent(HandlerOnPresence);
-                client.onLoginEvent += new ClientEvent(HandlerOnLogin);
-            }
-            catch
-            {
+            } catch {
                 MessageBox.Show("Неверный логин или пароль, попробуйте еще раз");
                 loginBox.Show();
                 passwordBox.Show();
@@ -278,9 +287,8 @@ namespace serializ2
             }
         }
 
-        private void Exit_Click(object sender, EventArgs e)
-        {
-            client.CloseConnection();
+        private void Exit_Click(object sender, EventArgs e) {
+            xmpp.Close();
             Exit.Hide();
             loginBox.Show();
             passwordBox.Show();
@@ -288,22 +296,27 @@ namespace serializ2
             //Add_Users.Show();
             buttonCreateConf.Hide();
             buttonJoinConf.Hide();
-            listBoxUsers.Items.Clear();
+            listUsers.Items.Clear();
             checkBoxConnected.Checked = false;
-
         }
 
-        private void Add_Users_Click(object sender, EventArgs e)
-        {
+        private void Add_Users_Click(object sender, EventArgs e) {
             FormAddUser add_us = new FormAddUser();//никак не работает
             add_us.Show();//ничего не делает
         }
 
-        private void buttonJoinConf_Click(object sender, EventArgs e) {
-            FormJoinConferention fJoinConf = new FormJoinConferention();
-            fJoinConf.Show();
+        private void createConference_Click(object sender, EventArgs e) {
+            List<string> users = new List<string>();
+            foreach ( var it in listUsers.Items )
+                users.Add(it.ToString());
+            FormCreateConferention fCreate = new FormCreateConferention(xmpp, mainJid, users);
+            fCreate.Show();
         }
 
+        private void buttonJoinConf_Click(object sender, EventArgs e) {
+            FormJoinConferention fJoinConf = new FormJoinConferention(xmpp, mainJid);
+            fJoinConf.Show();
+        }
 
     }
 }

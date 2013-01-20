@@ -22,7 +22,7 @@ namespace serializ2
             Application.Run(new FormFirst());
 #endif
 #if DEBUG 
-            Application.Run(new FormFirst(0));
+            Application.Run(new FormFirst(3));
 #endif
         }
         internal static string jid;

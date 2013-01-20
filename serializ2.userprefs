@@ -3,10 +3,9 @@
   <MonoDevelop.Ide.Workbench ActiveDocument="serializ2/FormConferention.cs">
     <Files>
       <File FileName="serializ2/ClientSide.cs" Line="69" Column="10" />
-      <File FileName="serializ2/FormFirst.cs" Line="173" Column="36" />
-      <File FileName="serializ2/FormConferention.cs" Line="25" Column="43" />
+      <File FileName="serializ2/FormFirst.cs" Line="257" Column="121" />
+      <File FileName="serializ2/FormConferention.cs" Line="31" Column="4" />
       <File FileName="serializ2/FormJoinConferention.cs" Line="19" Column="26" />
-      <File FileName="Disassembly" />
     </Files>
     <Pads>
       <Pad Id="MonoDevelop.Debugger.WatchPad">
@@ -19,9 +18,7 @@
     </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore>
-      <Breakpoint file="/media/trash/programming/git/xmpp/serializ2/FormConferention.cs" line="138" />
-    </BreakpointStore>
+    <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>

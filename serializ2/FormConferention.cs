@@ -15,24 +15,28 @@ using agsXMPP.protocol.x.muc;
 namespace serializ2 {
     public partial class FormConferention : Form {
         private Jid m_RoomJid;
-        private string m_Nickname = "khelek";
+        private Jid mainJid;
+        private string m_Nickname;
         private string roomName;
         private List<string> users;
         private XmppClientConnection m_XmppCon;
+        private MucManager muc;
 
-        public FormConferention(string _roomJid, List<string> _users) {
+        public FormConferention(XmppClientConnection xmpp, Jid jid, string nickname, string _roomJid, List<string> _users) {
             InitializeComponent();
             m_RoomJid = new Jid(_roomJid);
             users = _users;
-            m_XmppCon = Program.xmpp;
+            m_XmppCon = xmpp;
+            mainJid = jid;
+            m_Nickname = nickname;
+
+            muc = new MucManager(m_XmppCon);
 
             // Setup new Message Callback
             m_XmppCon.MesagageGrabber.Add(m_RoomJid, new BareJidComparer(), new MessageCB(MessageCallback), null);
 
             // Setup new Presence Callback
-            m_XmppCon.PresenceGrabber.Add(m_RoomJid, new BareJidComparer(), new PresenceCB(PresenceCallback), null);
-			
-			
+            m_XmppCon.PresenceGrabber.Add(m_RoomJid, new BareJidComparer(), new PresenceCB(PresenceCallback), null);				
         }
 
         private void textBoxMessage_KeyDown(object sender, KeyEventArgs e) {
@@ -105,10 +109,10 @@ namespace serializ2 {
                 BeginInvoke(new PresenceCB(PresenceCallback), new object[] { sender, pres, data });
                 return;
             }
-            string user = findListBoxItem(pres.From);
+            string user = findListBoxItem(pres.From.Resource);
             if ( user != null ) {
                 if ( pres.Type == PresenceType.unavailable ) {
-                    listBoxUsers.Items.Remove(user);
+                    listBoxConfUsers.Items.Remove(user);
                 } else {
                     //хз что делает
 
@@ -122,13 +126,13 @@ namespace serializ2 {
                     //}
                 }
             } else {
-                listBoxUsers.Items.Add(user);
+                listBoxConfUsers.Items.Add(pres.From.Resource);
             }
         }
 
-        private string findListBoxItem(Jid jid) {
-            foreach ( string i in listBoxUsers.Items ) {
-                if ( jid.ToString().ToLower() == i.ToLower() )
+        private string findListBoxItem(string jid) {
+            foreach ( string i in listBoxConfUsers.Items ) {
+                if ( jid.ToLower() == i.ToLower() )
                     return i;
             }
             return null;

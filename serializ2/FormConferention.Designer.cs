@@ -26,7 +26,7 @@
             this.txtSubject = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.listBoxUsers = new System.Windows.Forms.ListBox();
+            this.listBoxConfUsers = new System.Windows.Forms.ListBox();
             this.buttonSend = new System.Windows.Forms.Button();
             this.checkIfEnter = new System.Windows.Forms.CheckBox();
             this.textBoxSend = new System.Windows.Forms.TextBox();
@@ -59,14 +59,14 @@
             this.label2.TabIndex = 3;
             this.label2.Text = "Участники";
             // 
-            // listBoxUsers
+            // listBoxConfUsers
             // 
-            this.listBoxUsers.FormattingEnabled = true;
-            this.listBoxUsers.Location = new System.Drawing.Point(414, 30);
-            this.listBoxUsers.Name = "listBoxUsers";
-            this.listBoxUsers.ScrollAlwaysVisible = true;
-            this.listBoxUsers.Size = new System.Drawing.Size(148, 238);
-            this.listBoxUsers.TabIndex = 5;
+            this.listBoxConfUsers.FormattingEnabled = true;
+            this.listBoxConfUsers.Location = new System.Drawing.Point(414, 30);
+            this.listBoxConfUsers.Name = "listBoxConfUsers";
+            this.listBoxConfUsers.ScrollAlwaysVisible = true;
+            this.listBoxConfUsers.Size = new System.Drawing.Size(148, 238);
+            this.listBoxConfUsers.TabIndex = 5;
             // 
             // buttonSend
             // 
@@ -128,7 +128,7 @@
             this.Controls.Add(this.textBoxSend);
             this.Controls.Add(this.checkIfEnter);
             this.Controls.Add(this.buttonSend);
-            this.Controls.Add(this.listBoxUsers);
+            this.Controls.Add(this.listBoxConfUsers);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtSubject);
@@ -146,7 +146,7 @@
         private System.Windows.Forms.TextBox txtSubject;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.ListBox listBoxUsers;
+        private System.Windows.Forms.ListBox listBoxConfUsers;
         private System.Windows.Forms.Button buttonSend;
         private System.Windows.Forms.CheckBox checkIfEnter;
         private System.Windows.Forms.TextBox textBoxSend;

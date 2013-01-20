@@ -30,7 +30,6 @@
         {
             this.textBoxStatus = new System.Windows.Forms.TextBox();
             this.checkBoxConnected = new System.Windows.Forms.CheckBox();
-            this.listBoxUsers = new System.Windows.Forms.ListBox();
             this.label2 = new System.Windows.Forms.Label();
             this.button4 = new System.Windows.Forms.Button();
             this.loginBox = new System.Windows.Forms.TextBox();
@@ -40,6 +39,7 @@
             this.Exit = new System.Windows.Forms.Button();
             this.buttonCreateConf = new System.Windows.Forms.Button();
             this.buttonJoinConf = new System.Windows.Forms.Button();
+            this.listUsers = new System.Windows.Forms.ListView();
             this.SuspendLayout();
             // 
             // textBoxStatus
@@ -59,15 +59,6 @@
             this.checkBoxConnected.TabIndex = 9;
             this.checkBoxConnected.Text = "В сети";
             this.checkBoxConnected.UseVisualStyleBackColor = true;
-            // 
-            // listBoxUsers
-            // 
-            this.listBoxUsers.FormattingEnabled = true;
-            this.listBoxUsers.Location = new System.Drawing.Point(12, 66);
-            this.listBoxUsers.Name = "listBoxUsers";
-            this.listBoxUsers.Size = new System.Drawing.Size(161, 264);
-            this.listBoxUsers.TabIndex = 10;
-            this.listBoxUsers.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox2_MouseDoubleClick);
             // 
             // label2
             // 
@@ -160,11 +151,21 @@
             this.buttonJoinConf.Visible = false;
             this.buttonJoinConf.Click += new System.EventHandler(this.buttonJoinConf_Click);
             // 
+            // listUsers
+            // 
+            this.listUsers.Location = new System.Drawing.Point(12, 66);
+            this.listUsers.Name = "listUsers";
+            this.listUsers.Size = new System.Drawing.Size(161, 264);
+            this.listUsers.TabIndex = 21;
+            this.listUsers.UseCompatibleStateImageBehavior = false;
+            this.listUsers.View = System.Windows.Forms.View.List;
+            // 
             // FormFirst
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(298, 348);
+            this.Controls.Add(this.listUsers);
             this.Controls.Add(this.buttonJoinConf);
             this.Controls.Add(this.buttonCreateConf);
             this.Controls.Add(this.Exit);
@@ -174,7 +175,6 @@
             this.Controls.Add(this.loginBox);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.listBoxUsers);
             this.Controls.Add(this.checkBoxConnected);
             this.Controls.Add(this.textBoxStatus);
             this.Name = "FormFirst";
@@ -188,7 +188,6 @@
 
         private System.Windows.Forms.TextBox textBoxStatus;
         private System.Windows.Forms.CheckBox checkBoxConnected;
-        private System.Windows.Forms.ListBox listBoxUsers;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.TextBox loginBox;
@@ -198,6 +197,7 @@
         private System.Windows.Forms.Button Exit;
         private System.Windows.Forms.Button buttonCreateConf;
         private System.Windows.Forms.Button buttonJoinConf;
+        private System.Windows.Forms.ListView listUsers;
     }
 }
 
