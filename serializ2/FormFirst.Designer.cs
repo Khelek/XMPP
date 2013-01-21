@@ -40,6 +40,7 @@
             this.buttonCreateConf = new System.Windows.Forms.Button();
             this.buttonJoinConf = new System.Windows.Forms.Button();
             this.listUsers = new System.Windows.Forms.ListView();
+            this.buttonShowHideContacts = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // textBoxStatus
@@ -81,6 +82,7 @@
             // 
             // loginBox
             // 
+            this.loginBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.loginBox.Location = new System.Drawing.Point(183, 245);
             this.loginBox.Name = "loginBox";
             this.loginBox.Size = new System.Drawing.Size(106, 20);
@@ -90,6 +92,7 @@
             // 
             // passwordBox
             // 
+            this.passwordBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.passwordBox.Location = new System.Drawing.Point(183, 271);
             this.passwordBox.Name = "passwordBox";
             this.passwordBox.PasswordChar = '*';
@@ -100,6 +103,7 @@
             // 
             // Login_Button
             // 
+            this.Login_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.Login_Button.Location = new System.Drawing.Point(189, 297);
             this.Login_Button.Name = "Login_Button";
             this.Login_Button.Size = new System.Drawing.Size(100, 34);
@@ -110,6 +114,7 @@
             // 
             // Add_Users
             // 
+            this.Add_Users.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.Add_Users.Location = new System.Drawing.Point(183, 12);
             this.Add_Users.Name = "Add_Users";
             this.Add_Users.Size = new System.Drawing.Size(106, 49);
@@ -120,6 +125,7 @@
             // 
             // Exit
             // 
+            this.Exit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.Exit.Location = new System.Drawing.Point(183, 297);
             this.Exit.Name = "Exit";
             this.Exit.Size = new System.Drawing.Size(107, 33);
@@ -131,6 +137,7 @@
             // 
             // buttonCreateConf
             // 
+            this.buttonCreateConf.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCreateConf.Location = new System.Drawing.Point(183, 66);
             this.buttonCreateConf.Name = "buttonCreateConf";
             this.buttonCreateConf.Size = new System.Drawing.Size(106, 39);
@@ -142,6 +149,7 @@
             // 
             // buttonJoinConf
             // 
+            this.buttonJoinConf.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonJoinConf.Location = new System.Drawing.Point(183, 111);
             this.buttonJoinConf.Name = "buttonJoinConf";
             this.buttonJoinConf.Size = new System.Drawing.Size(106, 39);
@@ -153,19 +161,37 @@
             // 
             // listUsers
             // 
+            this.listUsers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listUsers.Location = new System.Drawing.Point(12, 66);
+            this.listUsers.MultiSelect = false;
             this.listUsers.Name = "listUsers";
             this.listUsers.Size = new System.Drawing.Size(161, 264);
             this.listUsers.TabIndex = 21;
             this.listUsers.UseCompatibleStateImageBehavior = false;
-            this.listUsers.View = System.Windows.Forms.View.List;
+            this.listUsers.View = System.Windows.Forms.View.SmallIcon;
+            this.listUsers.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listUsers_KeyDown);
             this.listUsers.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listUsers_MouseDoubleClick);
+            // 
+            // buttonShowHideContacts
+            // 
+            this.buttonShowHideContacts.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonShowHideContacts.Location = new System.Drawing.Point(183, 156);
+            this.buttonShowHideContacts.Name = "buttonShowHideContacts";
+            this.buttonShowHideContacts.Size = new System.Drawing.Size(107, 36);
+            this.buttonShowHideContacts.TabIndex = 22;
+            this.buttonShowHideContacts.Text = "Показать/скрыть оффлайн контакты";
+            this.buttonShowHideContacts.UseVisualStyleBackColor = true;
+            this.buttonShowHideContacts.Visible = false;
+            this.buttonShowHideContacts.Click += new System.EventHandler(this.buttonShowHideContacts_Click);
             // 
             // FormFirst
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(298, 348);
+            this.Controls.Add(this.buttonShowHideContacts);
             this.Controls.Add(this.listUsers);
             this.Controls.Add(this.buttonJoinConf);
             this.Controls.Add(this.buttonCreateConf);
@@ -181,6 +207,7 @@
             this.Name = "FormFirst";
             this.Text = "FormFirst";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormFirst_FormClosing);
+            this.Load += new System.EventHandler(this.FormFirst_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -200,6 +227,7 @@
         private System.Windows.Forms.Button buttonCreateConf;
         private System.Windows.Forms.Button buttonJoinConf;
         private System.Windows.Forms.ListView listUsers;
+        private System.Windows.Forms.Button buttonShowHideContacts;
     }
 }
 

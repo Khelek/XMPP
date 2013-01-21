@@ -11,17 +11,22 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 using agsXMPP;
 using agsXMPP.protocol.client;
+using System.Data.SQLite;
 
 
 namespace serializ2 {
 
-    delegate void ClientEvent(object o);
     public partial class FormFirst : Form {
         FormDialog formDialog;
         TabControl tabsDialog;
         XmppClientConnection xmpp;
         private Jid mainJid;// текущий логин пользователя(имеется ввиду jid на самом деле - xxx@yyy.zz)
-        private List<string> onlineUsers = new List<string>();
+        private string nickname = "user";
+        private List<string> onlineUsers = new List<string>();//хранятся контакты, которые в онлайне на момент загрузки списка контактов; затем отмечаются в списке как онлайн и удаляются
+        private List<ListViewItem> offlineUsers = new List<ListViewItem>();
+        bool offlineContactsHidden = false;
+        private SQLiteConnection sql_con;
+        private SQLiteCommand sql_cmd;
 
 
         public FormFirst() {
@@ -66,6 +71,7 @@ namespace serializ2 {
             dialog.ScrollBars = ScrollBars.Vertical;
             dialog.ReadOnly = true;
             dialog.BackColor = Color.White;
+            //dialog.Anchor = (AnchorStyles)(AnchorStyles.Bottom | AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right);
             if ( insideText != null ) {
                 dialog.AppendText(insideText);
             }
@@ -73,9 +79,11 @@ namespace serializ2 {
             textBoxSend.Location = new Point(dialog.Location.X, dialog.Location.Y + dialog.Height);
             textBoxSend.Size = new System.Drawing.Size(240, 45);
             textBoxSend.Multiline = true;
+            //textBoxSend.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             Button send = new Button();
             send.Text = "Послать";
             send.Location = new Point(dialog.Location.X + dialog.Width - 80, dialog.Location.Y + dialog.Height + 10);
+            //send.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             send.Click += delegate(object s, EventArgs a) {
                 SendTextMessage(tabName, dialog, textBoxSend.Text);
                 textBoxSend.Clear();
@@ -84,6 +92,7 @@ namespace serializ2 {
             enter.Text = "Send if Enter";
             enter.Location = new Point(textBoxSend.Location.X + textBoxSend.Width + 10, dialog.Location.Y + dialog.Height + 5);
             enter.Checked = true;
+            //enter.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
 
             textBoxSend.KeyDown += delegate(object o, KeyEventArgs k) {
                 if ( k.KeyCode == Keys.Enter && enter.Checked ) {
@@ -95,10 +104,12 @@ namespace serializ2 {
             tabsDialog.TabPages.Add(p);
         }
 
+
         private void SendTextMessage(string toJid, TextBox dialog, string message) {
             agsXMPP.protocol.client.Message msg = new agsXMPP.protocol.client.Message(new Jid(toJid), MessageType.chat, message);
             xmpp.Send(msg);
-            dialog.AppendText(formateString("user", message));
+            dialog.AppendText(formateString(nickname, message));
+            addMessageToDB(mainJid.Bare, toJid, message);
         }
 
         private int findTagPage(string name) {
@@ -133,7 +144,7 @@ namespace serializ2 {
 
         private void HandlerOnMessage(object o, agsXMPP.protocol.client.Message msg) {
             BeginInvoke(new MethodInvoker(delegate {
-                string from = msg.From.Bare.ToString();
+                string from = msg.From.Bare;
                 int indexTab;
                 switch ( msg.Type ) {
                     case MessageType.chat: //простое сообщение			
@@ -144,7 +155,11 @@ namespace serializ2 {
                         } else {
                             createTabPage(from, formateString(from, msg.Body));
                         }
-                        tabsDialog.Focus();
+                        indexTab = findTagPage(from);
+                        if ( !( formDialog.Focused && tabsDialog.SelectedIndex == indexTab ) ) {
+                            getListViewItem(from).BackColor = Color.Orange;
+                        }
+                        addMessageToDB(msg.From.Bare, msg.To.Bare, msg.Body);
                         break;
                     case MessageType.groupchat:
                         //конференции сами ловят сообщения в своей форме
@@ -160,16 +175,29 @@ namespace serializ2 {
             BeginInvoke(new MethodInvoker(delegate {
                 ListViewItem it = getListViewItem(presence.From.Bare);
                 if ( presence.Type.ToString() == "unavailable" || presence.Type.ToString() == "error" ) {//client.presence == "unavailable") 
-                    if ( it != null )
-                        it.ForeColor = Color.Red;
-                    else {
+                    if ( it == null ) {
                         onlineUsers.Remove(presence.From.Bare);
+                    } else if ( !offlineContactsHidden ) {
+                        it.ForeColor = Color.Red;
+                    } else {
+                        ListViewItem offlineUser = getListViewItem(presence.From.Bare);
+                        offlineUser.ForeColor = Color.Red;
+                        offlineUsers.Add(offlineUser);
                     }
                 }
                 if ( presence.Type.ToString() == "available" ) {
-                    if ( it != null )
+                    if ( it != null ) {
                         it.ForeColor = Color.Black;
-                    else {
+                    } else if ( offlineContactsHidden ) {
+                        ListViewItem listItem = offlineUsers.Find(item => item.Name == presence.From.Bare);
+                        if ( listItem == null ) {
+                            //здесь попадаются какие-то левые
+                        } else {
+                            listItem.ForeColor = Color.Black;
+                            listUsers.Items.Add(listItem);
+                            offlineUsers.Remove(listItem);
+                        }
+                    } else {
                         onlineUsers.Add(presence.From.Bare);
                     }
                 }
@@ -184,15 +212,37 @@ namespace serializ2 {
                     tabsDialog = new TabControl();
                     tabsDialog.Size = new System.Drawing.Size(500, 260);
                     tabsDialog.Location = new Point(10, 10);
+                    tabsDialog.Anchor = AnchorStyles.Bottom | AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+                    tabsDialog.SelectedIndexChanged += tabsDialogSelectedIndexChangedOrFormDialogFocused;
                     formDialog.Controls.AddRange(new Control[] { tabsDialog });
+                    formDialog.GotFocus += tabsDialogSelectedIndexChangedOrFormDialogFocused;
+                    formDialog.FormClosing += formDialog_FormClosing;
                     formDialog.Show();//this is
-                    formDialog.Hide();//КОООСТЫЫЫЫЫЛЬ
-                    formDialog.Close();
+                    formDialog.Hide();//КОООСТЫЫЫ
+                    formDialog.Close();//ЫЫЫЫЫЫЫЫЫЫЛЬ
                 }
                 buttonCreateConf.Show();
                 buttonJoinConf.Show();
+                buttonShowHideContacts.Show();
                 checkBoxConnected.Checked = true;
             }));
+        }
+
+        void formDialog_FormClosing(object sender, FormClosingEventArgs e) {
+            tabsDialog.TabPages.Clear();
+        }
+
+        private void tabsDialogSelectedIndexChangedOrFormDialogFocused(object sender, EventArgs e) {//длинное мнемоническое имя
+            if ( tabsDialog.SelectedTab == null )
+                return;
+            ListViewItem it = getListViewItem(tabsDialog.SelectedTab.Name);
+            if ( it == null ) {
+                return;
+            }
+            if ( it.BackColor != Color.Orange ) {
+                return;
+            }
+            it.BackColor = Color.Transparent;
         }
 
         private void HandlerOnRosterStart(object o) {
@@ -257,9 +307,10 @@ namespace serializ2 {
                 string jid = listUsers.SelectedItems[0].Name;
                 int index = findTagPage(jid);
                 if ( index == -1 ) {
-                    createTabPage(name, jid);
+                    createTabPage(name, jid, getHistoryFromDB(jid));
+                    tabsDialog.SelectedIndex = tabsDialog.TabPages.Count - 1;
                 } else {
-                    tabsDialog.TabPages[index].Focus();
+                    tabsDialog.SelectedIndex = index;
                 }
             }
         }
@@ -272,7 +323,41 @@ namespace serializ2 {
             //password.Clear();
         }
 
-        private void connect(string server, string connserver, string username, string password) {
+        private string getHistoryFromDB(string jidTo) {
+            string res = "";
+            int limit = 2;
+            Stack<string> lastMessages = new Stack<string>();            
+            sql_cmd.CommandText = @"SELECT * FROM chat_history WHERE user_from ='" + jidTo + "' OR user_to ='" + jidTo + "' ORDER BY date_time DESC LIMIT " + limit;
+            using ( SQLiteDataReader reader = sql_cmd.ExecuteReader() ) {
+                if ( reader.HasRows ) {
+                    for ( int i = 0; i < limit && reader.Read(); i++ ) {
+                        string from = reader.GetValue(0).ToString();
+                        if ( from == mainJid.Bare )
+                            from = nickname;
+                        lastMessages.Push(Environment.NewLine + from + "(" + reader.GetValue(2) + ")" + Environment.NewLine + reader.GetValue(3) + Environment.NewLine);
+                    }
+                }
+            }
+            while ( lastMessages.Count != 0 ) {
+                res += lastMessages.Pop();
+            }
+            if (res != "")
+                res += "_________________________________________________________________" + Environment.NewLine + Environment.NewLine;
+            return res;
+        }
+
+        private void addMessageToDB(string from, string to, string message) {
+            sql_cmd.CommandText = @"INSERT INTO chat_history (user_from,user_to,date_time,message) VALUES('" + from + "','" + to + "','" + DateTime.Now.ToString() + "', '" + message + "');";
+            int res = sql_cmd.ExecuteNonQuery();
+        }
+
+        private void connectDb() {
+            sql_con = new SQLiteConnection(@"Data Source=d:\programming\git\xmpp\serializ2\db\xmpp_db;New=False;Version=3");
+            sql_con.Open();
+            sql_cmd = sql_con.CreateCommand();
+        }
+
+        private void connectXmpp(string server, string connserver, string username, string password) {
             xmpp = new XmppClientConnection();
             xmpp.Server = server;//"jabberd.eu";
             xmpp.ConnectServer = connserver;// "jabberd.eu";
@@ -299,13 +384,11 @@ namespace serializ2 {
                 string server = loginBox.Text.Substring(loginBox.Text.IndexOf("@") + 1);
                 string connserver = ( server == "gmail.com" ) ? "talk.google.com" : ( ( server == "haupc" ) ? "192.168.1.3" : server );
                 mainJid = new Jid(loginBox.Text);
-                //khelek@jabberd.eu
-                //abe2b33519
                 Exit.Show();
                 loginBox.Hide();
                 passwordBox.Hide();
                 Login_Button.Hide();
-                connect(server, connserver, nickname, passwordBox.Text);
+                connectXmpp(server, connserver, nickname, passwordBox.Text);
                 //Add_Users.Hide();
             } catch {
                 MessageBox.Show("Неверный логин или пароль, попробуйте еще раз");
@@ -318,6 +401,7 @@ namespace serializ2 {
 
         private void Exit_Click(object sender, EventArgs e) {
             xmpp.Close();
+            listUsers.Items.Clear();
             Exit.Hide();
             loginBox.Show();
             passwordBox.Show();
@@ -325,7 +409,7 @@ namespace serializ2 {
             //Add_Users.Show();
             buttonCreateConf.Hide();
             buttonJoinConf.Hide();
-            listUsers.Items.Clear();
+            buttonShowHideContacts.Hide();
             checkBoxConnected.Checked = false;
         }
 
@@ -336,8 +420,8 @@ namespace serializ2 {
 
         private void createConference_Click(object sender, EventArgs e) {
             List<string> users = new List<string>();
-            foreach ( var it in listUsers.Items )
-                users.Add(it.ToString());
+            foreach ( ListViewItem it in listUsers.Items )
+                users.Add(it.Text);
             FormCreateConferention fCreate = new FormCreateConferention(xmpp, mainJid, users);
             fCreate.Show();
         }
@@ -351,6 +435,38 @@ namespace serializ2 {
             if ( xmpp != null )
                 xmpp.Close();
         }
+
+        private void buttonShowHideContacts_Click(object sender, EventArgs e) {
+            listUsers.BeginUpdate();
+            if ( offlineContactsHidden ) {
+                for ( int i = offlineUsers.Count - 1; i >= 0; i-- ) {
+                    listUsers.Items.Add(offlineUsers[i]);
+                    offlineUsers.RemoveAt(i);
+                }
+                offlineContactsHidden = false;
+            } else {
+                for ( int i = listUsers.Items.Count - 1; i >= 0; i-- ) {
+                    if ( listUsers.Items[i].ForeColor == Color.Red ) {
+                        offlineUsers.Add(listUsers.Items[i]);
+                        listUsers.Items.RemoveAt(i);
+                    }
+                }
+                offlineContactsHidden = true;
+            }
+            listUsers.EndUpdate();
+        }
+
+        private void listUsers_KeyDown(object sender, KeyEventArgs e) {
+            if ( e.KeyCode == Keys.Enter ) {
+                listUsers_MouseDoubleClick(sender, null);
+            }
+        }
+
+        private void FormFirst_Load(object sender, EventArgs e) {
+            connectDb();
+        }
+
+
 
     }
 }
