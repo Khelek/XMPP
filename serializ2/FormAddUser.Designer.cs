@@ -1,4 +1,4 @@
-﻿namespace serializ2
+﻿namespace EnterpriseMICApplicationDemo
 {
     partial class FormAddUser
     {

@@ -1,4 +1,4 @@
-﻿namespace serializ2 {
+﻿namespace EnterpriseMICApplicationDemo {
     partial class FormJoinConferention {
         /// <summary>
         /// Required designer variable.
@@ -34,9 +34,9 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(12, 5);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(128, 13);
+            this.label2.Size = new System.Drawing.Size(158, 13);
             this.label2.TabIndex = 11;
-            this.label2.Text = "Название конференции";
+            this.label2.Text = "Идентификатор конференции";
             // 
             // textBoxConfName
             // 
@@ -44,7 +44,7 @@
             this.textBoxConfName.Name = "textBoxConfName";
             this.textBoxConfName.Size = new System.Drawing.Size(235, 20);
             this.textBoxConfName.TabIndex = 10;
-            this.textBoxConfName.Text = "mclient@conference.haupc";
+            this.textBoxConfName.Text = "mclient";
             // 
             // buttonCancel
             // 
@@ -54,6 +54,7 @@
             this.buttonCancel.TabIndex = 8;
             this.buttonCancel.Text = "Отмена";
             this.buttonCancel.UseVisualStyleBackColor = true;
+            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
             // buttonCreate
             // 

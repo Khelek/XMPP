@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using agsXMPP;
 
-namespace serializ2
+namespace EnterpriseMICApplicationDemo
 {
     static class Program
     {
@@ -22,11 +22,10 @@ namespace serializ2
             Application.Run(new FormFirst());
 #endif
 #if DEBUG 
-            //( new FormFirst(5) ).Show();
-            Application.Run(new FormFirst(4));
+            //( new FormJabberStart(1) ).Show();
+            ( new FormJabberStart(2) ).Show();
+            Application.Run(new FormJabberStart(3));
 #endif
         }
-        internal static string jid;
-        internal static XmppClientConnection xmpp;
     }
 }

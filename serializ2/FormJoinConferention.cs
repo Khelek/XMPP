@@ -9,20 +9,19 @@ using System.Windows.Forms;
 using agsXMPP;
 using agsXMPP.protocol.client;
 
-namespace serializ2 {
+namespace EnterpriseMICApplicationDemo {
     public partial class FormJoinConferention : Form {
-        XmppClientConnection mainXmpp;
-        Jid mainJid;
 
-        public FormJoinConferention( XmppClientConnection xmpp, Jid jid) {
+        public FormJoinConferention() {
             InitializeComponent();
-            mainXmpp = xmpp;
-            mainJid = jid;
-        }
+        }		
 
         private void buttonCreate_Click(object sender, EventArgs e) {
-            FormConferention conf = new FormConferention(mainXmpp, mainJid, "khelek", textBoxConfName.Text, new List<string>() {"admin@haupc"});
-            conf.Show();
+            ( new FormConferention(textBoxConfName.Text.Trim() + "@conference." + Settings.server) ).Show();
+            this.Close();
+        }
+
+        private void buttonCancel_Click(object sender, EventArgs e) {
             this.Close();
         }
 

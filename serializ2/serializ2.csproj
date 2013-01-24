@@ -7,8 +7,8 @@
     <ProjectGuid>{8FB24B4A-1DBA-4765-BA6D-87CEF5C54EC2}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>serializ2</RootNamespace>
-    <AssemblyName>serializ2</AssemblyName>
+    <RootNamespace>EnterpriseMICApplicationDemo</RootNamespace>
+    <AssemblyName>EnterpriseMICApplicationDemo</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <ProductVersion>10.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
@@ -58,7 +58,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Conferentions.cs" />
     <Compile Include="FormConferention.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -70,12 +69,6 @@
     </Compile>
     <Compile Include="FormCreateConferention.Designer.cs">
       <DependentUpon>FormCreateConferention.cs</DependentUpon>
-    </Compile>
-    <Compile Include="FormFirst.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FormFirst.Designer.cs">
-      <DependentUpon>FormFirst.cs</DependentUpon>
     </Compile>
     <Compile Include="FormDialog.cs">
       <SubType>Form</SubType>
@@ -89,22 +82,32 @@
     <Compile Include="FormAddUser.Designer.cs">
       <DependentUpon>FormAddUser.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormJabberStart.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormJabberStart.Designer.cs">
+      <DependentUpon>FormJabberStart.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormJoinConferention.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FormJoinConferention.Designer.cs">
       <DependentUpon>FormJoinConferention.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSettings.Designer.cs">
+      <DependentUpon>FormSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings.cs" />
     <EmbeddedResource Include="FormConferention.resx">
       <DependentUpon>FormConferention.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormCreateConferention.resx">
       <DependentUpon>FormCreateConferention.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FormFirst.resx">
-      <DependentUpon>FormFirst.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormDialog.resx">
       <DependentUpon>FormDialog.cs</DependentUpon>
@@ -112,8 +115,14 @@
     <EmbeddedResource Include="FormAddUser.resx">
       <DependentUpon>FormAddUser.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FormJabberStart.resx">
+      <DependentUpon>FormJabberStart.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormJoinConferention.resx">
       <DependentUpon>FormJoinConferention.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSettings.resx">
+      <DependentUpon>FormSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -135,16 +144,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="temp.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="SQLite.Interop.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
